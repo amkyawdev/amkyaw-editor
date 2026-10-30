@@ -1,0 +1,33 @@
+{
+  "name": "Title Card",
+  "description": "Centered title with a fade-in and slide-up entrance, plus a fade-out exit.",
+  "fps": 30,
+  "durationSeconds": 5,
+  "resolution": { "width": 1920, "height": 1080 },
+  "layers": [
+    {
+      "name": "Background",
+      "type": "shape",
+      "shape": { "kind": "rect", "fill": { "r": 0.04, "g": 0.05, "b": 0.07, "a": 1 } },
+      "startFrame": 0,
+      "endFrame": 149
+    },
+    {
+      "name": "Title",
+      "type": "text",
+      "text": {
+        "content": "Your Title",
+        "fontFamily": "Inter",
+        "fontSize": 120,
+        "fontWeight": 700,
+        "letterSpacing": 0,
+        "lineHeight": 1.2,
+        "align": "center",
+        "color": { "r": 1, "g": 1, "b": 1, "a": 1 }
+      },
+      "startFrame": 0,
+      "endFrame": 149,
+      "presets": ["slide-in-up", "fade-out"]
+    }
+  ]
+}

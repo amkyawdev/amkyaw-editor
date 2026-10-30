@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Amkyaw Editor">
+  <rect x="30" y="30" width="452" height="452" rx="122" fill="#0b0d12" />
+  <rect x="126" y="176" width="72" height="180" rx="26" fill="#5b8cff" />
+  <rect x="220" y="136" width="72" height="266" rx="26" fill="#78c8ff" />
+  <rect x="314" y="222" width="72" height="134" rx="26" fill="#ffb45a" />
+  <polygon points="238,176 238,336 358,256" fill="#ffffff" fill-opacity="0.92" />
+</svg>
