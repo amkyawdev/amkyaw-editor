@@ -24,6 +24,25 @@ zustand stores, WebGL2 preview, FFmpeg.wasm export, Dexie/IndexedDB storage, PWA
   rejected with "Blocked request. This host is not allowed."
 - `vercel.json` must not contain a `$schema` key; Vercel's validator rejects it.
 
+## Vercel
+- Project `amkyaw-editor` (`prj_R2wiyH4njOHtNt5YmtZdSbDgasrW`), team scope
+  `amkyaw` = `team_4v526bPF6Q5bxVC2AhZC1Wa1`. Framework detected as vite.
+- Live at **https://amkyaw-editor.vercel.app** (production alias, publicly
+  reachable). The generated `*-amkyaw.vercel.app` and per-branch
+  `*-git-<branch>-amkyaw.vercel.app` aliases are behind SSO
+  (`ssoProtection.deploymentType = all_except_custom_domains`), so they return
+  a Vercel login page. Use the bare `amkyaw-editor.vercel.app` host to check
+  the app, or add a protection-bypass secret for the others.
+- Git production branch is `main`, but the first deployment was built from
+  `feat/mobile-first-editor` and still became the production alias because the
+  project had no prior production deployment.
+- Deploy without the CLI (it hangs fetching packages) via
+  `POST https://api.vercel.com/v13/deployments?teamId=<team>` with
+  `{"name","project","target","gitSource":{"type":"github","repoId":<id>,"ref":"<branch>"}}`.
+  Poll `GET /v13/deployments/<id>?teamId=<team>` for `status: READY`.
+- `vercel.json` in the repo is honoured: output dir `dist`, SPA rewrite to
+  `/index.html`, and COOP/COEP headers are live (confirmed on the deployment).
+
 ## Conventions and decisions
 - Frames are the canonical time unit; seconds only at the edges (`src/lib/time.ts`).
 - Pointer Events only (no TouchEvents) for gestures — one path for mouse/touch/pen.
