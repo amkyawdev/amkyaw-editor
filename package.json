@@ -13,13 +13,11 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@ffmpeg/ffmpeg": "^0.12.10",
-    "@ffmpeg/util": "^0.12.1",
-    "dexie": "^4.0.10",
-    "nanoid": "^5.0.9",
+    "framer-motion": "^14.8.0",
+    "lucide-react": "^1.65.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "zustand": "^5.0.2"
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
     "@testing-library/react": "^16.0.1",

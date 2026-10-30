@@ -37,8 +37,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          ffmpeg: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
           react: ['react', 'react-dom'],
+          motion: ['framer-motion'],
         },
       },
     },

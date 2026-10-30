@@ -10,104 +10,171 @@
   }
 
   body {
-    @apply bg-[#0b0d12] text-slate-200 antialiased;
+    @apply bg-base text-ink antialiased;
     margin: 0;
+    font-family: Inter, 'SF Pro Display', system-ui, -apple-system, sans-serif;
     overscroll-behavior: none;
+    /* Stops iOS double-tap zoom from fighting editor gestures. */
+    touch-action: manipulation;
   }
 
-  /* Mobile browsers zoom on inputs below 16px; keep inputs at 16px. */
+  /* Mobile Safari zooms any input under 16px, which breaks the layout. */
   input,
   textarea,
-  select,
-  button {
+  select {
     font-size: 16px;
   }
 
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   :focus-visible {
-    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-[#0b0d12];
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-base;
+  }
+
+  ::selection {
+    background: rgba(124, 58, 237, 0.4);
   }
 }
 
 @layer components {
-  .panel {
-    @apply rounded-xl border border-edge bg-panel/95 backdrop-blur;
+  /* Glassmorphism overlay surface */
+  .glass {
+    background: rgba(30, 30, 42, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
 
-  .panel-alt {
-    @apply rounded-lg border border-edge/70 bg-panelAlt;
+  .surface-card {
+    @apply rounded-card border border-edge bg-surface1;
   }
 
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium
-      text-slate-200 transition-colors hover:bg-edge/60 active:bg-edge;
+  .surface-elevated {
+    @apply rounded-card border border-edge bg-surface2 shadow-float;
   }
 
+  .text-gradient {
+    @apply bg-gradient-to-br from-primary to-pink bg-clip-text text-transparent;
+  }
+
+  /* Primary action: violet → pink gradient with press glow */
   .btn-primary {
-    @apply bg-accent text-white hover:bg-accent/90;
+    @apply rounded-btn px-4 font-btn text-btn text-white;
+    background-image: linear-gradient(135deg, #7c3aed, #ec4899);
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
   }
 
   .btn-ghost {
-    @apply bg-transparent hover:bg-edge/50;
+    @apply rounded-btn border border-edge bg-surface2 font-btn text-btn text-ink;
   }
 
-  .field {
-    @apply w-full rounded-lg border border-edge bg-[#0f1117] px-3 py-2 text-sm text-slate-100
-      placeholder:text-slate-500;
+  .btn-icon {
+    @apply flex items-center justify-center rounded-btn text-muted;
+    min-width: 44px;
+    min-height: 44px;
   }
 
-  .label {
-    @apply text-[11px] font-medium uppercase tracking-wide text-slate-400;
+  .pill {
+    @apply rounded-pill px-2.5 py-1 text-micro font-label;
   }
 
-  .chip {
-    @apply rounded-full border border-edge bg-panelAlt px-2.5 py-1 text-xs text-slate-300;
+  /* Every interactive element gets the same tactile press feedback. */
+  .pressable {
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out, background-color 150ms ease-out;
+  }
+
+  .pressable:active {
+    transform: scale(0.95);
+  }
+
+  .label-micro {
+    @apply text-micro font-label uppercase tracking-wider text-muted;
   }
 }
 
-/* Slim scrollbars; desktop only, mobile uses momentum scrolling. */
-@media (hover: hover) {
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+@layer utilities {
+  .safe-t {
+    padding-top: var(--safe-top);
   }
 
-  ::-webkit-scrollbar-track {
-    background: transparent;
+  .safe-b {
+    padding-bottom: var(--safe-bottom);
   }
 
-  ::-webkit-scrollbar-thumb {
-    background: #2a2f3a;
-    border-radius: 999px;
-    border: 2px solid #0b0d12;
+  /* Keeps bottom chrome clear of the home indicator. */
+  .pb-safe-toolbar {
+    padding-bottom: calc(var(--safe-bottom) + 0px);
   }
 
-  ::-webkit-scrollbar-thumb:hover {
-    background: #3a4150;
+  .scroll-x {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .scroll-x::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scroll-y {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scrollbar-width: none;
+  }
+
+  .scroll-y::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Gesture surfaces must not let the browser steal the touch. */
+  .gesture-surface {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Checkerboard behind the canvas so alpha is visible. */
+  .checkerboard {
+    background-image: linear-gradient(45deg, #16161f 25%, transparent 25%),
+      linear-gradient(-45deg, #16161f 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #16161f 75%),
+      linear-gradient(-45deg, transparent 75%, #16161f 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    background-color: #0f0f16;
   }
 }
 
-@keyframes sheet-in {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
+/* Skeleton shimmer for async content (never spinners). */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.shimmer {
+  position: relative;
+  overflow: hidden;
 }
 
-.animate-sheet-in {
-  animation: sheet-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.12), transparent);
+  animation: shimmer 1.4s infinite;
 }
 
-.animate-fade-in {
-  animation: fade-in 160ms ease-out;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

@@ -1,22 +1,114 @@
 # Amkyaw Editor
 
-A mobile-first, browser-based video and animation editor. It runs entirely on the
-device: WebGL2 for preview, FFmpeg.wasm for export, IndexedDB for storage, and a
-service worker for offline use. There is no backend.
+A mobile-first video editor UI built with React, TypeScript and Tailwind CSS.
+Dark, cinematic, and designed around a 390×844 iPhone baseline.
 
-Live-ready on Vercel — `vercel.json` sets the build, the SPA rewrite, and the
-cross-origin isolation headers FFmpeg.wasm needs.
+![stack](https://img.shields.io/badge/React-18-7C3AED) ![stack](https://img.shields.io/badge/TypeScript-5-06B6D4) ![stack](https://img.shields.io/badge/Tailwind-3-EC4899)
 
-## Why it is built this way
+## Live
 
-| Decision | Reason |
+**https://amkyaw-editor.vercel.app**
+
+## Design system
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `base` | `#0A0A0F` | App background |
+| `surface1` | `#14141C` | Cards, bars |
+| `surface2` | `#1E1E2A` | Elevated panels |
+| `edge` | `#2A2A3A` | 1px dividers |
+| `primary` | `#7C3AED` | Buttons, active states, selection |
+| gradient | `135deg, #7C3AED → #EC4899` | Primary actions, Export |
+| `secondary` | `#06B6D4` | Playhead, sliders, timecode |
+| `success` / `warning` / `danger` | `#10B981` / `#F59E0B` / `#EF4444` | Status |
+| `ink` / `muted` / `disabled` | `#F5F5F7` / `#8B8B9E` / `#4A4A5A` | Text tiers |
+
+Radii: 12px cards, 16px sheets, 20px buttons, 999px pills.
+Shadow: `0 8px 32px rgba(0,0,0,0.4)`. Glass: `rgba(30,30,42,0.7)` + `blur(20px)`.
+Active glow: `0 0 20px rgba(124,58,237,0.4)`.
+
+Type: Inter / SF Pro Display. 11px micro, 13px body, 15px button, 18px title, 22px screen.
+Weights 400 / 500 / 600 / 700, exposed as `font-body`, `font-label`, `font-btn`, `font-head`.
+
+## Layout (portrait 390×844)
+
+```
+┌─────────────────────────────┐
+│ TOP BAR 56px   name · undo · export (glass)
+├─────────────────────────────┤
+│ VIEWPORT  flex-1  pinch-zoom, checkerboard, handles
+├─────────────────────────────┤
+│ PLAYBACK 48px  clock · play · duration + cyan bar
+├─────────────────────────────┤
+│ TIMELINE 160px  48px gutter + scrolling clips + playhead
+├─────────────────────────────┤
+│ TOOLBAR 64px  Layer · Effects · Text · Transform · Settings
+└─────────────────────────────┘
+        safe-area-inset-bottom
+```
+
+The viewport is the only element that flexes, so the timeline and toolbar never
+move as the preview resizes.
+
+## Interactions
+
+| Gesture | Result |
 | --- | --- |
-| WebGL2 preview, 2D canvas export | Preview needs shader effects; export needs cheap per-frame readback. |
-| Frames as the canonical time unit | Avoids float drift when trimming, scrubbing and exporting. |
-| Wall-clock playback accumulator | Dropped animation frames do not slow the timeline down. |
-| One shared `BottomSheet` | The drag gesture and backdrop mount once, so switching panels does not replay the entrance animation. |
-| Pointer Events for all gestures | One code path serves mouse, touch and pen, and `setPointerCapture` keeps drags alive off-element. |
-| Blobs in IndexedDB, ids in the project | Reloading restores media without re-importing. |
+| Tap a clip | Select it; trim handles appear |
+| Drag a clip horizontally | Move it along the timeline |
+| Long-press a clip | Context menu: duplicate, split at playhead, delete |
+| Drag the ruler | Scrub the playhead |
+| Pinch the preview | Zoom 0.5×–4× |
+| Double-tap the preview | Toggle 2× / reset |
+| Swipe down on the preview | Reset zoom |
+| Drag the sheet handle down | Dismiss the sheet |
+
+Motion: `scale(0.95)` on press with a 150ms ease-out spring, sheets slide up over
+300ms `cubic-bezier(0.32,0.72,0,1)`, panels fade+slide in 200ms. Haptics fire via
+`navigator.vibrate` on selection, step changes and errors.
+
+## UX principles applied
+
+1. **Thumb zone** — every primary action is in the bottom 40% of the screen.
+2. **Touch targets** — 44px minimum, 48px for the primary transport and Export.
+3. **No critical action top-right** — Export is duplicated conceptually but the
+   toolbar owns the reachable path; the top bar holds only frequent-but-safe actions.
+4. **No hover states** — all feedback is press/active or focus-visible.
+5. **Progressive disclosure** — advanced controls live in bottom sheets.
+6. **Long-press for context** — never right-click.
+7. **Empty states** — gradient illustration plus "Tap + to add your first clip".
+8. **Loading** — shimmer skeletons, never spinners.
+9. **Errors** — toasts anchored above the toolbar, auto-dismissing at 3s (4.2s for errors).
+
+## Project layout
+
+```
+src/
+  editor/
+    EditorApp.tsx          shell: phone-first, desktop side-by-side
+    useEditorStore.ts      zustand store: project, transport, history, toasts
+    types.ts               types, colour map, clock formatting
+    mockData.ts            3 sample layers, 5 clips, 10 effects
+    components/
+      TopBar.tsx           inline-editable name, undo/redo, Export
+      Viewport.tsx         pinch zoom, checkerboard, selection handles
+      PlaybackBar.tsx      transport + cyan progress bar
+      Timeline.tsx         ruler scrub, clips, drag-move, playhead
+      LayerInspector.tsx   X/Y/Scale/Rotation/Opacity + keyframe diamonds
+      ToolBar.tsx          5 tools, active glow
+      BottomSheet.tsx      drag-to-dismiss sheet
+      ContextMenu.tsx      long-press menu, edge-clamped
+      Toasts.tsx           tone-coloured, above the toolbar
+      EmptyState.tsx  Skeleton.tsx
+      AddSheet / EffectsSheet / TextSheet / TransformSheet /
+      SettingsSheet / ExportSheet / SheetHost
+  hooks/
+    useGestures.ts         pointer gestures: tap, double-tap, long-press, pan, pinch
+    useKeyboardShortcuts.ts
+  mobile/haptics.ts        vibration patterns + step-change feedback
+  lib/                     math, throttle, time
+  styles/                  globals.css (tokens), safe-area.css
+```
 
 ## Getting started
 
@@ -24,105 +116,35 @@ cross-origin isolation headers FFmpeg.wasm needs.
 npm install
 npm run dev        # http://localhost:12000
 npm run build      # typecheck + production build into dist/
-npm run preview    # serve the built app on :4173
-npm test           # vitest (36 tests)
+npm run preview    # serve the build on :4173
+npm test           # vitest, 30 tests
 ```
 
-Node 20+ is required.
+Node 20+ required.
 
-## Project layout
+## Tests
 
-```
-public/
-  manifest.json          PWA manifest (installable, standalone)
-  sw.js                  service worker source (injectManifest)
-  icons/                 192 / 512 / maskable PNGs + SVG
-  workers/
-    render.worker.js     OffscreenCanvas frame rendering
-    thumbnail.worker.js  timeline thumbnail strip generation
-    ffmpeg.worker.js     FFmpeg.wasm export off the main thread
-  assets/templates/      starter project JSON blueprints
-  assets/fonts/          optional self-hosted webfonts
+`npm test` covers the logic that is easy to get subtly wrong: clock and duration
+formatting, the layer/clip/effect reducers, undo/redo (including redo-stack
+invalidation), clip split bounds, clip drag clamping, zoom clamping, and mock
+project integrity (every clip resolves to a real layer, ids unique).
 
-src/
-  animations/            easing curves, keyframe evaluation, presets, registry
-  components/
-    mobile/              BottomSheet, MobileToolbar, PinchViewport,
-                         TouchTimeline, FloatingMenu, MobileSheets
-    Timeline/            desktop timeline with keyframe diamonds
-    Viewport/            canvas surface, desktop + mobile preview
-    Sidebar/             layers, inspector, media bin, export
-    common/              NumberDrag, Slider, Toasts
-  core/                  renderer, scene-graph, compositor, time-controller,
-                         audio-mixer, ffmpeg-manager, export-pipeline, effects
-  mobile/                performance monitor, memory manager, gestures,
-                         haptics, orientation, wake lock, file system
-  hooks/                 timeline, animation, playback, gestures, long press,
-                         responsive, keyboard shortcuts, editor session
-  store/                 project, editor, history, ui (zustand)
-  lib/                   math, time, id, throttle, storage (Dexie)
-  types/                 layer, animation, track, effect, project
-  styles/                globals.css, safe-area.css
-```
-
-## Mobile behaviour
-
-* **Safe areas** — `--safe-top/bottom/left/right` from `env(safe-area-inset-*)`
-  drive `.safe-frame`, `.bottom-dock` and the toolbar offset, so nothing hides
-  under a notch or the home indicator.
-* **Thumb reach** — the primary toolbar sits at the bottom edge; panels open as
-  drag-up sheets with velocity-aware snapping.
-* **Gestures** — pinch to zoom the preview, drag the ruler to scrub, long-press
-  for a context menu, double-tap to toggle zoom.
-* **Haptics** — `navigator.vibrate` fires on step changes, not on every move.
-* **Screen awake** — the wake lock is acquired during playback and export, and
-  re-acquired on visibility change because browsers drop it when hidden.
-* **Memory** — `MemoryManager` enforces an LRU budget derived from
-  `navigator.deviceMemory`, and the performance monitor flags a degraded preview
-  below 24 fps.
-
-## Export
-
-Frames are composited at project resolution on a 2D canvas, converted to raw
-RGBA, then handed to FFmpeg.wasm in a worker. Supported formats: MP4 (H.264),
-WebM (VP9), animated GIF, animated WebP, and PNG sequence.
-
-`vercel.json` and the Vite dev/preview servers send `Cross-Origin-Opener-Policy:
-same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. Those headers make
-`SharedArrayBuffer` available, which is what the multi-threaded FFmpeg core
-requires. Without them export still works, but single-threaded and slower.
-
-On phones the finished file is offered through the native share sheet
-(`navigator.share`) and falls back to a download.
-
-## Keyboard shortcuts (desktop)
+## Keyboard (desktop)
 
 | Key | Action |
 | --- | --- |
-| `Space` / `K` | Play or pause |
+| `Space` | Play / pause |
 | `←` / `→` | Step one frame |
-| `Shift` + `←` / `→` | Step ten frames |
-| `V` / `H` / `T` | Select, hand, text tool |
-| `⌘Z` / `Ctrl+Z` | Undo |
+| `Shift` + `←` / `→` | Step one second |
+| `⌘Z` / `Ctrl+Z` | Undo (`Shift` to redo) |
+| `Escape` | Close the open sheet |
 
-## Deploying to Vercel
+## Deploying
 
 ```bash
-npm i -g vercel
-vercel          # preview deployment
-vercel --prod   # production deployment
+vercel --prod
 ```
 
-Vercel reads `vercel.json`: `npm run build` produces `dist/`, everything outside
-`/assets`, `/workers`, `/icons` and the PWA files rewrites to `/index.html`, and
-the isolation headers are applied to all routes. If a preview deployment has
-Deployment Protection enabled, automated checks need a Protection Bypass secret
-sent as the `x-vercel-protection-bypass` header.
-
-## Testing
-
-`npm test` covers the pure logic that is easy to get subtly wrong: frame/time
-conversion and timecode round-tripping, easing curves, keyframe interpolation
-and clamping, scene-graph flattening and parent/child ordering, animated track
-resolution, and project store mutations. Rendering and export need a real GPU
-and are verified manually.
+`vercel.json` sets `npm run build`, the `dist` output directory, the SPA rewrite,
+and long-lived caching for hashed assets. This is a front-end-only app with mock
+data — there is no backend, and nothing is uploaded.

@@ -1,13 +1,18 @@
-/* Safe-area + touch ergonomics for notch and home-indicator devices. */
+/* Safe-area insets for notch and home-indicator devices. */
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
-  --toolbar-height: 56px;
-  --touch-target: 44px;
+
+  /* Layout rhythm, mirrored from tailwind spacing tokens. */
+  --topbar-height: 56px;
+  --playback-height: 48px;
+  --timeline-height: 160px;
+  --toolbar-height: 64px;
 }
 
+/* Full-bleed frame that respects every inset. */
 .safe-frame {
   padding-top: var(--safe-top);
   padding-bottom: var(--safe-bottom);
@@ -15,65 +20,19 @@
   padding-right: var(--safe-right);
 }
 
-.safe-top {
-  padding-top: var(--safe-top);
-}
-
-.safe-bottom {
+/* Bottom-anchored chrome sits above the home indicator. */
+.bottom-dock {
+  bottom: 0;
   padding-bottom: var(--safe-bottom);
 }
 
-/* Bottom-anchored chrome must clear the home indicator and the toolbar. */
-.bottom-dock {
-  bottom: 0;
-  padding-bottom: calc(var(--safe-bottom) + 8px);
-}
-
-.bottom-dock--raised {
-  bottom: calc(var(--toolbar-height) + var(--safe-bottom));
-}
-
-.touch-target {
-  min-width: var(--touch-target);
-  min-height: var(--touch-target);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-/* Prevents the iOS rubber-band scroll from fighting canvas gestures. */
-.gesture-surface {
-  touch-action: none;
-  overscroll-behavior: contain;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.scroll-surface {
-  touch-action: pan-y;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-.horizontal-scroll {
-  touch-action: pan-x;
-  overscroll-behavior-x: contain;
+/* The toolbar is the last row, so it owns the bottom inset. */
+.toolbar-dock {
+  padding-bottom: calc(var(--safe-bottom) + 4px);
 }
 
 @media (display-mode: standalone) {
   .pwa-only\:hidden {
     display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
   }
 }
