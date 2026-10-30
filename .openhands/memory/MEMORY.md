@@ -11,16 +11,15 @@ zustand stores, WebGL2 preview, FFmpeg.wasm export, Dexie/IndexedDB storage, PWA
 
 ## Environment quirks (cost real time to discover)
 - The git remote is `amkyawdev/amkyaw-editor` and the clone is shallow (grafted).
-- **Pushes fail with 403.** The `GITHUB_TOKEN` is a GitHub App installation
-  token: it authenticates as user `amkyawdev` and the API reports
-  `permissions: {push: true}` on the repo, but ref writes still return
-  `Resource not accessible by integration`. `x-oauth-scopes` is empty, which is
-  the tell that it is an App token, not a PAT. The 403 comes from the App
-  installation's *contents: write* grant, not from the token being expired.
-  Fix is outside the agent: grant the App Contents write, or supply a PAT with
-  `repo` scope (e.g. via a registered secret) and use it in the remote URL.
-- The pre-existing remote URL had a stale embedded token; it was replaced with
-  `${GITHUB_TOKEN}` via `git remote set-url`.
+- **`GITHUB_TOKEN` cannot write to this repo.** It is a GitHub App installation
+  token (empty `x-oauth-scopes` is the tell) and ref writes return 403
+  `Resource not accessible by integration`, even though the API reports
+  `permissions: {push: true}`. Pushing requires a real PAT with `repo` scope
+  instead. Never store the PAT in `.git/config`; push with a one-off URL:
+  `git push https://x-access-token:$PAT@github.com/amkyawdev/amkyaw-editor.git <branch>`.
+- `remote.origin.fetch` was narrowed to `+refs/heads/main:...`, so no other
+  remote-tracking refs existed and `git status` could not report ahead/behind.
+  Widened to `+refs/heads/*:refs/remotes/origin/*`.
 - Vite dev/preview need `allowedHosts: true` or the sandbox runtime host is
   rejected with "Blocked request. This host is not allowed."
 - `vercel.json` must not contain a `$schema` key; Vercel's validator rejects it.
