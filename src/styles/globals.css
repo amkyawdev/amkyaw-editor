@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-[#0b0d12] text-slate-200 antialiased;
+    margin: 0;
+    overscroll-behavior: none;
+  }
+
+  /* Mobile browsers zoom on inputs below 16px; keep inputs at 16px. */
+  input,
+  textarea,
+  select,
+  button {
+    font-size: 16px;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-[#0b0d12];
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-xl border border-edge bg-panel/95 backdrop-blur;
+  }
+
+  .panel-alt {
+    @apply rounded-lg border border-edge/70 bg-panelAlt;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium
+      text-slate-200 transition-colors hover:bg-edge/60 active:bg-edge;
+  }
+
+  .btn-primary {
+    @apply bg-accent text-white hover:bg-accent/90;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent hover:bg-edge/50;
+  }
+
+  .field {
+    @apply w-full rounded-lg border border-edge bg-[#0f1117] px-3 py-2 text-sm text-slate-100
+      placeholder:text-slate-500;
+  }
+
+  .label {
+    @apply text-[11px] font-medium uppercase tracking-wide text-slate-400;
+  }
+
+  .chip {
+    @apply rounded-full border border-edge bg-panelAlt px-2.5 py-1 text-xs text-slate-300;
+  }
+}
+
+/* Slim scrollbars; desktop only, mobile uses momentum scrolling. */
+@media (hover: hover) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2a2f3a;
+    border-radius: 999px;
+    border: 2px solid #0b0d12;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3a4150;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-sheet-in {
+  animation: sheet-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.animate-fade-in {
+  animation: fade-in 160ms ease-out;
+}
