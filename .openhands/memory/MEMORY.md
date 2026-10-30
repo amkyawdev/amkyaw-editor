@@ -1,12 +1,21 @@
 # Project memory — amkyaw-editor
 
-Mobile-first browser video/animation editor. Vite + React 18 + TS + Tailwind 3,
-zustand stores, WebGL2 preview, FFmpeg.wasm export, Dexie/IndexedDB storage, PWA.
+Mobile-first video editor UI (Alight Motion / CapCut class). Vite + React 18 +
+TS + Tailwind 3 + zustand + framer-motion + lucide-react. Front-end only with
+mock data — no backend, no WebGL, no FFmpeg. Dark cinematic theme (violet
+#7C3AED → pink #EC4899 gradient, cyan #06B6D4 playhead), 390x844 baseline.
+
+The original engine build (WebGL renderer, scene graph, FFmpeg.wasm export,
+Dexie storage, workers) was replaced in the 2026-10-30 redesign; those modules
+and the @ffmpeg/dexie/nanoid deps are gone. Do not reintroduce them unless the
+user asks for real media processing.
+
+Live: https://amkyaw-editor.vercel.app
 
 ## Commands
 - `npm run dev` — Vite on :12000 with COOP/COEP headers
 - `npm run build` — `tsc --noEmit && vite build` (build fails if types fail)
-- `npm test` — vitest, 36 tests, `tests/**/*.test.ts`
+- `npm test` — vitest, 30 tests, `tests/**/*.test.ts`
 - `npm run preview` — serves dist on :4173
 
 ## Environment quirks (cost real time to discover)
@@ -44,13 +53,15 @@ zustand stores, WebGL2 preview, FFmpeg.wasm export, Dexie/IndexedDB storage, PWA
   `/index.html`, and COOP/COEP headers are live (confirmed on the deployment).
 
 ## Conventions and decisions
-- Frames are the canonical time unit; seconds only at the edges (`src/lib/time.ts`).
+- All editor code lives in `src/editor/` with its own zustand store; only
+  `lib/math`, `lib/throttle`, `mobile/haptics`, `hooks/useGestures` and
+  `hooks/useKeyboardShortcuts` are shared.
+- Seconds (not frames) are the time unit in this UI.
 - Pointer Events only (no TouchEvents) for gestures — one path for mouse/touch/pen.
-- One shared `BottomSheet` instance in `MobileSheets` so switching panels does
-  not replay the entrance animation.
-- Workers live in `public/workers/` as plain JS (not bundled, not typechecked).
-  Worker code that needs types belongs under `src/`.
-- `public/` is copied verbatim — files there are never compiled.
-- Easing is authored on the *outgoing* keyframe (the segment it starts).
-- Effects in the export pipeline are limited to what canvas 2D filters support;
-  vignette runs as a second pass with `source-atop`.
+- One shared `BottomSheet` in `SheetHost` so switching tools does not replay the
+  entrance animation.
+- `useGestures` takes an optional external ref; do NOT assign to the returned
+  ref's `.current` (it is a `RefObject` and readonly under `strict`).
+- Tailwind: the `fontWeight` scale must stay in the config or `font-label` etc.
+  fail the build with a postcss error.
+- `public/` is copied verbatim and never compiled.
